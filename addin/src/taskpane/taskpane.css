@@ -1,80 +1,602 @@
-/* 
- * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
- */
-
- html,
- body {
-     width: 100%;
-     height: 100%;
-     margin: 0;
-     padding: 0;
- }
- 
- ul {
-     margin: 0;
-     padding: 0;
- }
- 
- .ms-welcome__header {
-    padding: 20px;
-    padding-bottom: 30px;
-    padding-top: 100px;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    align-items: center;
- }
-
- .ms-welcome__main {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    -webkit-flex-wrap: nowrap;
-    flex-wrap: nowrap;
-    -webkit-align-items: center;
-    align-items: center;
-    -webkit-flex: 1 0 0;
-    flex: 1 0 0;
-    padding: 10px 20px;
- }
- 
- .ms-welcome__main > h2 {
-     width: 100%;
-     text-align: center;
- }
- 
- .ms-welcome__features {
-     list-style-type: none;
-     margin-top: 20px;
- }
- 
- .ms-welcome__features.ms-List .ms-ListItem {
-     padding-bottom: 20px;
-     display: -webkit-flex;
-     display: flex;
- }
- 
- .ms-welcome__features.ms-List .ms-ListItem > .ms-Icon {
-     margin-right: 10px;
- }
- 
- .ms-welcome__action.ms-Button--hero {
-     margin-top: 30px;
- }
- 
-.ms-Button.ms-Button--hero .ms-Button-label {
-  color: #0078d7;
+/* ─── Design Tokens ───────────────────────────────────────────────────────── */
+:root {
+  --bg:           #0b0c11;
+  --surface:      #13141c;
+  --surface-2:    #1a1b26;
+  --border:       #1f2033;
+  --border-light: #2a2b40;
+  --green:        #00ff94;
+  --green-dim:    rgba(0, 255, 148, 0.12);
+  --green-glow:   rgba(0, 255, 148, 0.25);
+  --blue:         #4d9eff;
+  --blue-dim:     rgba(77, 158, 255, 0.1);
+  --yellow:       #ffd166;
+  --red:          #ff5c7c;
+  --text:         #d4d5e8;
+  --text-muted:   #5a5c7a;
+  --text-dim:     #3a3c55;
+  --mono:         'IBM Plex Mono', monospace;
+  --sans:         'DM Sans', sans-serif;
+  --radius:       6px;
+  --radius-lg:    10px;
 }
 
-.ms-Button.ms-Button--hero:hover .ms-Button-label,
-.ms-Button.ms-Button--hero:focus .ms-Button-label{
-  color: #005a9e;
+/* ─── Reset & Base ────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle scanline texture */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 999;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Green top accent line */
+#header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--green), transparent 70%);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  background: var(--green-dim);
+  border: 1px solid rgba(0,255,148,0.2);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-title {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--green);
+  letter-spacing: 0.05em;
+}
+
+.header-version {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
+
+/* Status pill */
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 8px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.status-dot.connected {
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green-glow);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.status-dot.error {
+  background: var(--red);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.status-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ─── Model Quick-Select Bar ──────────────────────────────────────────────── */
+.model-bar {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.model-bar::-webkit-scrollbar { display: none; }
+
+.model-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
   cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
-b {
-    font-weight: bold;
+.model-chip:hover {
+  color: var(--text);
+  border-color: var(--border-light);
+  background: var(--surface-2);
+}
+
+.model-chip.active {
+  color: var(--green);
+  border-color: rgba(0,255,148,0.3);
+  background: var(--green-dim);
+}
+
+/* ─── Chat Window ─────────────────────────────────────────────────────────── */
+#chat-window {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+#chat-window::-webkit-scrollbar { width: 3px; }
+#chat-window::-webkit-scrollbar-track { background: transparent; }
+#chat-window::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 2px;
+}
+
+/* ─── Message Bubbles ─────────────────────────────────────────────────────── */
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: msg-in 0.2s ease forwards;
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+@keyframes msg-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Role label */
+.msg-role {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0 2px;
+}
+
+.message.user .msg-role   { color: var(--blue); }
+.message.assistant .msg-role { color: var(--green); }
+
+/* Bubble */
+.msg-content {
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  line-height: 1.6;
+  font-size: 12.5px;
+  position: relative;
+}
+
+.message.user .msg-content {
+  background: var(--blue-dim);
+  border: 1px solid rgba(77,158,255,0.15);
+  border-radius: var(--radius-lg) var(--radius-lg) 4px var(--radius-lg);
+  color: var(--text);
+  margin-left: 20px;
+}
+
+.message.assistant .msg-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--green);
+  border-radius: 4px var(--radius-lg) var(--radius-lg) var(--radius-lg);
+  color: var(--text);
+}
+
+/* Inline code / cell refs in messages */
+.msg-content code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--yellow);
+}
+
+/* Bold inside messages */
+.msg-content strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Lists inside assistant messages */
+.msg-content ul {
+  padding-left: 16px;
+  margin-top: 6px;
+}
+
+.msg-content li {
+  margin-bottom: 3px;
+  color: var(--text);
+}
+
+/* Cells-written badge */
+.cells-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid rgba(0,255,148,0.2);
+  border-radius: 3px;
+  padding: 2px 7px;
+  margin-top: 7px;
+}
+
+/* Error messages */
+.message.error .msg-content {
+  border-left-color: var(--red);
+  color: #ff8fa3;
+}
+
+/* ─── Cell References Panel ───────────────────────────────────────────────── */
+#cell-refs {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  max-height: 130px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.refs-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+
+.refs-icon {
+  color: var(--green);
+  font-size: 11px;
+}
+
+.refs-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  flex: 1;
+}
+
+.refs-close {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.refs-close:hover { color: var(--text); }
+
+#refs-list {
+  padding: 4px 8px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ref-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ref-item:hover {
+  border-color: rgba(0,255,148,0.3);
+  background: var(--green-dim);
+}
+
+.ref-addr {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.ref-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Typing Indicator ────────────────────────────────────────────────────── */
+#typing-indicator {
+  padding: 0 14px 4px;
+  flex-shrink: 0;
+}
+
+.typing-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--green);
+  border-radius: 4px var(--radius-lg) var(--radius-lg) var(--radius-lg);
+  padding: 7px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.typing-label { margin-right: 2px; }
+
+.dot-1, .dot-2, .dot-3 {
+  animation: blink 1.2s infinite;
+  color: var(--green);
+  font-size: 14px;
+  line-height: 1;
+}
+.dot-2 { animation-delay: 0.2s; }
+.dot-3 { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.2; }
+  40%            { opacity: 1; }
+}
+
+/* ─── Input Area ──────────────────────────────────────────────────────────── */
+#input-area {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.input-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.input-action-btn:hover {
+  color: var(--text);
+  border-color: var(--border-light);
+}
+
+.input-action-btn.active {
+  color: var(--green);
+  border-color: rgba(0,255,148,0.35);
+  background: var(--green-dim);
+  box-shadow: 0 0 8px var(--green-glow);
+}
+
+#user-input {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  line-height: 1.5;
+  padding: 7px 10px;
+  resize: none;
+  outline: none;
+  transition: border-color 0.15s;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+#user-input::placeholder { color: var(--text-dim); }
+
+#user-input:focus {
+  border-color: rgba(0,255,148,0.3);
+  box-shadow: 0 0 0 2px var(--green-dim);
+}
+
+#send-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  background: var(--green);
+  border: none;
+  color: #0b0c11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+#send-btn:hover {
+  background: #00e085;
+  box-shadow: 0 0 10px var(--green-glow);
+}
+
+#send-btn:disabled {
+  background: var(--surface-2);
+  color: var(--text-dim);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ─── Footer Hint ─────────────────────────────────────────────────────────── */
+.footer-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 12px 8px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+#ctx-status { color: var(--text-muted); transition: color 0.2s; }
+#ctx-status.active { color: var(--green); }
+
+.footer-sep { color: var(--text-dim); }
+
+/* ─── Welcome screen ──────────────────────────────────────────────────────── */
+.welcome-msg {
+  border: 1px dashed var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin: 4px 0;
+}
+
+.welcome-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+
+.welcome-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11.5px;
+  color: var(--text);
+}
+
+.welcome-item:last-child { border-bottom: none; }
+
+.welcome-item .tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid rgba(0,255,148,0.2);
+  border-radius: 3px;
+  padding: 1px 5px;
+  white-space: nowrap;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.welcome-hint {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.welcome-hint em {
+  color: var(--yellow);
+  font-style: normal;
 }

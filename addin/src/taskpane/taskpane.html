@@ -1,52 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=Edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Financial AI Agent</title>
+  <title>Sterling</title>
   <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="taskpane.css">
 </head>
 <body>
   <div id="app">
-    <header>
-      <span class="logo">⚡</span>
-      <span class="title">FinanceAI</span>
-      <span class="status" id="statusDot">●</span>
-    </header>
 
-    <div id="chat-window">
-      <div class="message assistant">
-        <div class="msg-content">
-          👋 I'm your Financial AI Agent Sterling. I can:
-          <ul>
-            <li>Build 3-Statement, DCF, and LBO models</li>
-            <li>Fetch live stock data and financials</li>
-            <li>Highlight and explain every cell I use</li>
-            <li>Analyze uploaded 10-K PDFs</li>
-          </ul>
-          Try: <em>"Build a DCF for Apple"</em> or <em>"Create a 3-statement model"</em>
+    <!-- ── Header ───────────────────────────────────────────────────────── -->
+    <header id="header">
+      <div class="header-left">
+        <div class="logo-mark">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M2 14 L6 8 L10 11 L14 4 L16 6" stroke="#00ff94" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16" cy="6" r="1.5" fill="#00ff94"/>
+          </svg>
+        </div>
+        <span class="header-title">Sterling</span>
+        <span class="header-version">v1.0</span>
+      </div>
+      <div class="header-right">
+        <div class="status-pill" id="statusPill">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-label" id="statusLabel">connecting</span>
         </div>
       </div>
+    </header>
+
+    <!-- ── Model quick-select ────────────────────────────────────────────── -->
+    <div class="model-bar">
+      <button type="button" class="model-chip active" data-model="dcf">DCF</button>
+      <button type="button" class="model-chip" data-model="3stmt">3-Stmt</button>
+      <button type="button" class="model-chip" data-model="lbo">LBO</button>
+      <button type="button" class="model-chip" data-model="comps">Comps</button>
+      <button type="button" class="model-chip" data-model="custom">Custom</button>
     </div>
 
+    <!-- ── Chat window ───────────────────────────────────────────────────── -->
+    <div id="chat-window">
+      <!-- Welcome message injected by JS on load -->
+    </div>
+
+    <!-- ── Cell references panel ────────────────────────────────────────── -->
     <div id="cell-refs" style="display:none">
-      <div class="refs-title">📍 Cell References</div>
+      <div class="refs-header">
+        <span class="refs-icon">◈</span>
+        <span class="refs-title">CELL REFERENCES</span>
+        <button type="button" class="refs-close" id="refsClose" aria-label="Close cell references">✕</button>
+      </div>
       <div id="refs-list"></div>
     </div>
 
+    <!-- ── Typing indicator ──────────────────────────────────────────────── -->
+    <div id="typing-indicator" style="display:none">
+      <div class="typing-bubble">
+        <span class="typing-label">Processing</span>
+        <span class="dot-1">.</span><span class="dot-2">.</span><span class="dot-3">.</span>
+      </div>
+    </div>
+
+    <!-- ── Input area ────────────────────────────────────────────────────── -->
     <div id="input-area">
-      <button id="ctx-btn" title="Send current sheet context with message">📊</button>
-      <textarea id="user-input" placeholder="Ask me anything financial..." rows="2"></textarea>
-      <button id="send-btn">➤</button>
+      <button type="button" class="input-action-btn" id="ctx-btn" title="Include selected cells as context" aria-label="Include selected cells as context">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+          <rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+          <rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+          <rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+      </button>
+      <textarea id="user-input" placeholder="Ask anything financial…" rows="1"></textarea>
+      <button type="button" id="send-btn" aria-label="Send message">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M12 7L2 2l2.5 5L2 12l10-5z" fill="currentColor"/>
+        </svg>
+      </button>
     </div>
 
-    <div id="loading" style="display:none">
-      <span class="spinner">⟳</span> Thinking...
+    <!-- ── Footer hint ───────────────────────────────────────────────────── -->
+    <div class="footer-hint">
+      <span id="ctx-status">⊡ no context</span>
+      <span class="footer-sep">·</span>
+      <span>Enter to send</span>
+      <span class="footer-sep">·</span>
+      <span>Shift+Enter for newline</span>
     </div>
+
   </div>
-
   <script src="taskpane.js"></script>
 </body>
 </html>
