@@ -1,7 +1,7 @@
 /* global Office, Excel */
 
 // ─── State ────────────────────────────────────────────────────────────────────
-const BACKEND_URL = 'https://your-render-app.onrender.com/api'; // Change this after deployment
+const BACKEND_URL = 'http://localhost:3001/api';
 // During local dev, use: 'http://localhost:3001/api'
 
 let conversationHistory = [];
